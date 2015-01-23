@@ -35,21 +35,24 @@ def parse_prism(infile, outfile, fastdic):
 					fields=line.split('\t')
 					chr=fields[0]
 					sta=fields[1]
+                                        sta=str(int(sta)-1)
 					end=fields[2]
-					siz=int(end)-int(sta)+1
 					typ=fields[4]
 					cov=fields[5]
 					ide="."
 					qua="."
 					fil="PASS"
-					inf="DP=%s;SVTYPE=%s;SVLEN=%s"%(cov,typ,siz)
 					if typ=="INS":
-						ref="."
-						alt=fields[21].strip()
+						siz=len(fields[21].strip())
+						ref=fastdic[chr][int(sta)-1]
+						alt=ref+fields[21].strip()
 					else:
 						ref=fastdic[chr][int(sta)-1:int(end)]
-						alt="."
+						#alt=fastdic[chr][int(sta)-1]
+						alt=ref[:1]
+						siz=len(ref)-1
 						#print ref
+					inf="DP=%s;SVTYPE=%s;SVLEN=%s"%(cov,typ,siz)
 					outline="\t".join([chr,sta,ide,ref,alt,qua,fil,inf]) + "\n"
 					out.write(outline)
 					#print outline
