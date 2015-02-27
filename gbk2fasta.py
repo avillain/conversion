@@ -1,19 +1,29 @@
-#!/usr/bin/env python2.6
+#!/usr/bin/env python2.7
 # -*- coding: utf-8 -*- 
 
-import sys
 from Bio import SeqIO
-gbk_filename = sys.argv[1]
-faa_filename = sys.argv[2]
-input_handle  = open(gbk_filename, "r")
-output_handle = open(faa_filename, "w")
+import argparse
+import sys
 
-for seq_record in SeqIO.parse(input_handle, "genbank") :
-    print "Dealing with GenBank record %s" % seq_record.id
-    output_handle.write(">%s %s\n%s\n" % (
-           seq_record.id,
-           seq_record.description,
-           seq_record.seq))
+if __name__ == '__main__':
+        parser = argparse.ArgumentParser()
+        parser.add_argument('genbank', help='Genbank input file')
+        parser.add_argument('fasta', nargs='?', help='Output genome fasta file')
+        args = parser.parse_args()
+	try:
+                sys.stdout=open(args.fasta,"w") if args.fasta else sys.__stdout__
+        except:
+                print("Error, could not create file %s\n" %args.fasta)
+		raise
+	try:
+		with open(args.genbank, "r") as genfile:
+			for seq_record in SeqIO.parse(genfile, "genbank") :
+				print >> sys.stderr, "Dealing with GenBank record %s" % seq_record.id
+    				print ">%s %s\n%s\n" % (seq_record.id, seq_record.description, seq_record.seq)
 
-output_handle.close()
-input_handle.close()
+	except:
+		print("Error, could not open file %s\n" %args.genbank)
+		raise
+	if args.fasta:
+		sys.stdout.close()
+
